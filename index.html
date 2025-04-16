@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zetamac Clone - Skip on Wrong</title>
+  <style>
+    body {
+      background-color: black;
+      color: lime;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #problem {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    #input {
+      font-size: 2rem;
+      width: 200px;
+      text-align: center;
+      padding: 0.4em;
+      border: 2px solid lime;
+      background: black;
+      color: lime;
+    }
+    #timer, #score {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="problem">Loading...</div>
+  <input type="number" id="input" autocomplete="off" autofocus />
+  <div id="timer">Time: 120</div>
+  <div id="score"></div>
+
+  <script>
+    const problemEl = document.getElementById('problem');
+    const inputEl = document.getElementById('input');
+    const timerEl = document.getElementById('timer');
+    const scoreEl = document.getElementById('score');
+
+    let timeLeft = 120;
+    let correct = 0;
+    let attempted = 0;
+    let startTime;
+    let totalTime = 0;
+    let currentAnswer = 0;
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateProblem() {
+      const opType = randomInt(0, 3); // 0:+ 1:- 2:* 3:/
+      let a, b, display, answer;
+      switch (opType) {
+        case 0:
+          a = randomInt(2, 100);
+          b = randomInt(2, 100);
+          display = `${a} + ${b}`;
+          answer = a + b;
+          break;
+        case 1:
+          a = randomInt(2, 100);
+          b = randomInt(2, 100);
+          if (b > a) [a, b] = [b, a];
+          display = `${a} - ${b}`;
+          answer = a - b;
+          break;
+        case 2:
+          a = randomInt(2, 12);
+          b = randomInt(2, 100);
+          display = `${a} × ${b}`;
+          answer = a * b;
+          break;
+        case 3:
+          b = randomInt(2, 12);
+          answer = randomInt(2, 100);
+          a = b * answer;
+          display = `${a} ÷ ${b}`;
+          break;
+      }
+      problemEl.textContent = display;
+      currentAnswer = answer;
+      inputEl.value = '';
+      inputEl.focus();
+      startTime = performance.now();
+    }
+
+    function nextProblem(isCorrect) {
+      const timeTaken = (performance.now() - startTime) / 1000;
+      totalTime += timeTaken;
+      attempted++;
+      if (isCorrect) correct++;
+      generateProblem();
+    }
+
+    inputEl.addEventListener('input', () => {
+      const val = parseInt(inputEl.value);
+      if (!isNaN(val)) {
+        if (val === currentAnswer) {
+          nextProblem(true);
+        } else {
+          nextProblem(false); // Skip on wrong answer
+        }
+      }
+    });
+
+    function endGame() {
+      problemEl.textContent = '✓ Done';
+      inputEl.disabled = true;
+      const accuracy = ((correct / attempted) * 100).toFixed(1);
+      const avgTime = (totalTime / attempted).toFixed(2);
+      scoreEl.innerHTML = `Correct: ${correct}<br>
+        Attempted: ${attempted}<br>
+        Accuracy: ${accuracy}%<br>
+        Avg Time: ${avgTime}s`;
+    }
+
+    function startTimer() {
+      const interval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Time: ${timeLeft}`;
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    generateProblem();
+    startTimer();
+  </script>
+</body>
+</html>
