@@ -52,7 +52,7 @@
     let attempted = 0;
     let startTime;
     let totalTime = 0;
-    let currentAnswer = 0;
+    let currentAnswer = '';
 
     function randomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -89,7 +89,7 @@
           break;
       }
       problemEl.textContent = display;
-      currentAnswer = answer;
+      currentAnswer = answer.toString();
       inputEl.value = '';
       inputEl.focus();
       startTime = performance.now();
@@ -104,12 +104,12 @@
     }
 
     inputEl.addEventListener('input', () => {
-      const val = parseInt(inputEl.value);
-      if (!isNaN(val)) {
+      const val = inputEl.value.trim();
+      if (val.length >= currentAnswer.length) {
         if (val === currentAnswer) {
           nextProblem(true);
         } else {
-          nextProblem(false); // Skip on wrong answer
+          nextProblem(false);
         }
       }
     });
